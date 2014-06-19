@@ -1,0 +1,92 @@
+#!/bin/env ruby
+
+$:.unshift(File.expand_path('../../lib', __FILE__))
+
+require 'optparse'
+require 'folder_contents_history'
+require 'filename_history'
+
+def string_prompt(prompt = '>')
+  begin
+  print("#{prompt} ")
+  gets.chomp
+rescue Interrupt
+  exit 130
+end
+end
+
+def prompt?(text, options = {})
+  begin
+    default = options[:yes]
+    return default if options[:quiet]
+    opts = default ? "[Y/n]" : "[y/N]"
+    while true
+      print "#{text} #{opts} "
+      c = STDIN.gets.chomp!
+      if c.downcase == 'y' or (default and c =='')
+        return true
+      elsif c.downcase == 'n' or (not default and c =='')
+        return false
+      end
+    end
+  rescue Interrupt
+    exit 130
+  end
+end
+
+options = { mode: :rename }
+optparse = OptionParser.new do |opts|
+  opts.on('-b','--backup','Make backup') { options[:backup] = true }
+  opts.on('-B','--new-backup','Start backups anew, implies --backup') do
+    options[:new_backup] = true
+    options[:backup] = true
+  end
+  opts.on('-n','--dry-run','Simulate') { options[:dry_run] = true }
+  opts.on('-y','--yes','Assume yes as default') { options[:yes] = true }
+  opts.on('-q','--quiet','Do not print anything') { options[:quiet] = true }
+  opts.on('-r','--restore','Restore backup') { options[:mode] = :restore }
+  opts.on('-R','--reapply','Reapply history') { options[:mode] = :reapply }
+  opts.on('-f','--file FILE', "File for backup/restore") { |file| options[:history_file] = file }
+  opts.on('-H','--history', "Show history for file") { options[:mode] = :history }
+  opts.on('-h','--help', "Print help") do
+    puts opts
+    exit
+  end
+end
+optparse.parse!
+options[:history_file] ||= '.backup'
+
+if options[:mode] == :rename
+  if ARGV.length != 2
+    options[:regexp] = Regexp.compile(string_prompt)
+    options[:replacement] = string_prompt
+  else
+    options[:regexp] = Regexp.compile(ARGV[0])
+    options[:replacement] = ARGV[1]
+  end
+end
+
+if File.exists?(options[:history_file]) && !options[:new_backup]
+  history = FolderContentsHistory.new_from_history(options[:history_file])
+else
+  history = FolderContentsHistory.new
+  history.load_entries('.')
+end
+
+case options[:mode]
+when :history
+  history.show_history(ARGV.empty? ? Dir["*"] : ARGV)
+when :restore
+  history.plan_rollbacks
+when :rename
+  history.plan_renames(options[:regexp], options[:replacement])
+when :reapply
+  history.plan_reapplication('.')
+end
+history.log unless options[:quiet]
+unless options[:dry_run] || options[:mode] == :history  
+  if !history.changed.empty? && prompt?("Execute the rename?", options)
+    history.log_backup(options[:history_file]) if options[:backup]
+    history.execute
+  end
+end
