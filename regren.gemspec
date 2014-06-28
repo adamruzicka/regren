@@ -12,5 +12,6 @@ Gem::Specification.new do |s|
 	s.executables << 'regren'
 	s.license = 'MIT'
 	s.add_dependency 'json', '~> 0'
-	s.add_development_dependency 'minitest', '~> 0'
+	s.add_development_dependency 'minitest', '~> 1.3', '>= 4.7.3'
+  s.required_ruby_version = '>= 1.9.2'
 end
