@@ -70,8 +70,9 @@ if File.exists?(options[:history_file]) && !options[:new_backup]
   history = FolderContentsHistory.new_from_history(options[:history_file])
 else
   history = FolderContentsHistory.new
-  history.load_entries('.')
 end
+  
+history.load_entries
 
 case options[:mode]
 when :history
@@ -80,6 +81,7 @@ when :restore
   history.plan_rollbacks
 when :rename
   history.plan_renames(options[:regexp], options[:replacement])
+  require 'pry'; binding.pry
 when :reapply
   history.plan_reapplication('.')
 end

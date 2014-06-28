@@ -6,10 +6,13 @@ class FolderContentsHistory
     @entries = entries
   end
 
-  def load_entries(path)
-    @entries = Dir["#{path}/*"].inject({}) do |hash, item|
+  def load_entries(path = '.')
+    entries = Dir["#{path}/*"].inject({}) do |hash, item|
       pathless = item.gsub(/#{path}\//,'')
       hash.update(pathless => FileNameHistory.new(pathless))
+    end
+    @entries.merge!(entries) do |key, old_hash, new_hash|
+      old_hash.history.length > new_hash.history.length ? old_hash : new_hash
     end
   end
 
@@ -73,7 +76,7 @@ class FolderContentsHistory
   end
 
   def changed
-    @entries.select { |_key, value| value.changed? }
+    @entries.select { |_key, value| value.changed? && value.present? }
   end
 
   def show_history(files)

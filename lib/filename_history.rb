@@ -15,6 +15,10 @@ class FileNameHistory
                                history)
   end
 
+  def present?
+    File.exists?(@current)
+  end
+
   def original
     @history.first
   end

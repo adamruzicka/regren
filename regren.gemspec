@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name = 'regren'
-	s.version = '0.0.1'
+	s.version = '0.0.3'
 	s.date = '2014-06-28'
 	s.summary = 'regren'
 	s.homepage = 'https://github.com/adamruzicka/regren'
