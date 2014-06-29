@@ -1,6 +1,6 @@
 regren
 ======
-[![Build Status](https://travis-ci.org/adamruzicka/regren.svg?branch=master)](https://travis-ci.org/adamruzicka/regren):
+[![Gem Version](https://badge.fury.io/rb/regren.svg)](http://badge.fury.io/rb/regren)[![Build Status](https://travis-ci.org/adamruzicka/regren.svg?branch=master)](https://travis-ci.org/adamruzicka/regren)
 
 ##Examples
 This is what you're looking for, right?
@@ -37,7 +37,7 @@ i386_install_55.iso
 -> install55.iso
 
 # copy .backup file to another folder containing for example install54.iso
-# run with -r flag to reapply renames to this file
+# run with -R flag to reapply renames to this file
 $ regren -R
 install54.iso
 -> i386_install_54.iso
