@@ -1,4 +1,6 @@
 class FileNameHistory
+  attr_reader :history, :current
+
   def initialize(name, history = [])
     @history = history.empty? ? [name] : history
     @current = name
@@ -11,20 +13,16 @@ class FileNameHistory
   end
 
   def self.new_from_history(history)
-    return FileNameHistory.new(history.last,
-                               history)
+    FileNameHistory.new(history.last,
+                        history)
   end
 
   def present?
-    File.exists?(@current)
+    File.exist?(@current)
   end
 
   def original
     @history.first
-  end
-
-  def history
-    @history
   end
 
   def last_name
@@ -67,9 +65,4 @@ class FileNameHistory
     where.puts(@current)
     where.puts("-> #{@history.last}")
   end
-
-  def current
-    @current
-  end
-
 end
