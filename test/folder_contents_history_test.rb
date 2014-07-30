@@ -113,14 +113,7 @@ describe 'FolderContentsHistory test' do
 
     it 'warns about conflict' do
       @fch.plan_reapplication('.')
-      -> { @fch.log }.must_output(<<-MSG.gsub(/^.*\|/,'')
-       |==================================================
-       |!!! Some files would be lost by this operation !!!
-       |==================================================
-       |test-1
-       |-> test-3
-       MSG
-       )
+      -> { @fch.log }.must_output(/!!! Some files would be lost by this operation !!!/)
     end
   end
 end

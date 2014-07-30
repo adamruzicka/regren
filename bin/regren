@@ -5,10 +5,11 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'optparse'
 require 'folder_contents_history'
 require 'filename_history'
+require 'colorize'
 
 def string_prompt(prompt = '>')
   begin
-    print("#{prompt} ")
+    print("#{prompt} ".colorize(:color => :green))
     gets.chomp
   rescue Interrupt
     exit 130
@@ -90,7 +91,7 @@ when :rename
 when :reapply
   history.plan_reapplication('.')
 end
-history.log unless options[:quiet]
+history.log(options[:regexp], options[:replacement]) unless options[:quiet]
 unless options[:dry_run] || options[:mode] == :history
   if !history.changed.empty? && prompt?('Execute the rename?', options)
     history.log_backup(options[:history_file]) if options[:backup]

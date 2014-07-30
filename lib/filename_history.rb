@@ -1,4 +1,7 @@
 class FileNameHistory
+  
+  require 'colorize'
+
   attr_reader :history, :current
 
   def initialize(name, history = [])
@@ -31,7 +34,11 @@ class FileNameHistory
 
   def plan_rename(regexp, replacement)
     new_name = @current.gsub(regexp, replacement)
-    @history << new_name if new_name != current
+    if new_name != current
+      @current_color = @current.gsub(regexp, '\0'.colorize(:color => :green))
+      @last_color = @current.gsub(regexp, replacement.colorize(:color => :cyan))
+      @history << new_name
+    end
   end
 
   def plan_rollback
@@ -60,9 +67,17 @@ class FileNameHistory
     where.print "-> #{@history.join("\n-> ")}\n\n"
   end
 
+  def last_color
+    @last_color || last_name
+  end
+
+  def current_color
+    @current_color || @current
+  end
+
   def log(where = $stdout)
     return unless changed?
-    where.puts(@current)
-    where.puts("-> #{@history.last}")
+    where.puts(current_color)
+    where.puts("-> #{last_color}")
   end
 end

@@ -1,5 +1,5 @@
 class FolderContentsHistory
-  require 'json'
+  require 'multi_json'
 
   def initialize(entries = {})
     @entries = entries
@@ -51,9 +51,9 @@ class FolderContentsHistory
     end
   end
 
-  def log
+  def log(regexp = '', replacement = '')
     if conflicts?
-      puts <<-NOTE.gsub(/^.*\|/, '')
+      puts <<-NOTE.gsub(/^.*\|/, '').colorize(:color => :red)
       |==================================================
       |!!! Some files would be lost by this operation !!!
       |==================================================
@@ -70,7 +70,7 @@ class FolderContentsHistory
     backup = with_history.reduce({}) do |hash, item|
       hash.update(item.last.to_hash)
     end
-    File.write(where, JSON.pretty_generate(backup))
+    File.write(where, MultiJson.dump(backup, :pretty => true))
   end
 
   def to_hash(input_hash = @entries)
@@ -98,7 +98,7 @@ class FolderContentsHistory
   end
 
   def self.new_from_history(history_file)
-    entries = JSON.parse(File.read(history_file)).reduce({}) do |hash, item|
+    entries = MultiJson.load(File.read(history_file)).reduce({}) do |hash, item|
       hash.update(item.first => FileNameHistory.new_from_history(item.last))
     end
     FolderContentsHistory.new(entries)
